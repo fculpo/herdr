@@ -105,6 +105,14 @@ impl App {
         }
     }
 
+    pub(super) fn save_focus_follows_mouse(&mut self, enabled: bool) {
+        if self.update_config_file("focus follows mouse", |content| {
+            crate::config::upsert_section_bool(content, "ui", "focus_follows_mouse", enabled)
+        }) {
+            self.apply_config_from_disk(false);
+        }
+    }
+
     pub(super) fn save_agent_panel_sort(&mut self, sort: crate::app::state::AgentPanelSort) {
         let value = match sort {
             crate::app::state::AgentPanelSort::Spaces => {

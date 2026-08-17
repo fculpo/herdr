@@ -1032,6 +1032,9 @@ impl AppState {
             MouseEventKind::Moved if self.mode == Mode::Terminal && !in_sidebar => {
                 if let Some(info) = self.pane_at(mouse.column, mouse.row).cloned() {
                     let _ = self.forward_pane_mouse_motion(terminal_runtimes, &info, mouse);
+                    if self.focus_follows_mouse {
+                        return self.mouse_pane_focus_action(info.id);
+                    }
                 }
             }
 
@@ -2759,6 +2762,114 @@ mod tests {
             input_rx.try_recv().expect("forwarded captured left press"),
             Bytes::from_static(b"\x1b[<0;2;2M")
         );
+    }
+
+    #[tokio::test]
+    async fn hover_focuses_pane_when_focus_follows_mouse_enabled() {
+        let mut app = app_for_mouse_test();
+        let mut ws = Workspace::test_new("test");
+        let source = ws.tabs[0].root_pane;
+        let target = ws.test_split(Direction::Horizontal);
+        ws.tabs[0].layout.focus_pane(source);
+        app.state.workspaces = vec![ws];
+        app.state.active = Some(0);
+        app.state.selected = 0;
+        app.state.focus_follows_mouse = true;
+        crate::ui::compute_view(&mut app.state, Rect::new(0, 0, 106, 20));
+        let info = app
+            .state
+            .pane_info_by_id(target)
+            .expect("target pane info")
+            .clone();
+
+        app.handle_mouse(mouse(
+            MouseEventKind::Moved,
+            info.inner_rect.x + 1,
+            info.inner_rect.y + 1,
+        ));
+
+        assert_eq!(app.state.workspaces[0].focused_pane_id(), Some(target));
+    }
+
+    #[tokio::test]
+    async fn hover_does_not_focus_pane_when_focus_follows_mouse_disabled() {
+        let mut app = app_for_mouse_test();
+        let mut ws = Workspace::test_new("test");
+        let source = ws.tabs[0].root_pane;
+        let target = ws.test_split(Direction::Horizontal);
+        ws.tabs[0].layout.focus_pane(source);
+        app.state.workspaces = vec![ws];
+        app.state.active = Some(0);
+        app.state.selected = 0;
+        crate::ui::compute_view(&mut app.state, Rect::new(0, 0, 106, 20));
+        let info = app
+            .state
+            .pane_info_by_id(target)
+            .expect("target pane info")
+            .clone();
+
+        app.handle_mouse(mouse(
+            MouseEventKind::Moved,
+            info.inner_rect.x + 1,
+            info.inner_rect.y + 1,
+        ));
+
+        assert_eq!(app.state.workspaces[0].focused_pane_id(), Some(source));
+    }
+
+    #[tokio::test]
+    async fn hover_over_focused_pane_is_a_no_op() {
+        let mut app = app_for_mouse_test();
+        let mut ws = Workspace::test_new("test");
+        let source = ws.tabs[0].root_pane;
+        let _target = ws.test_split(Direction::Horizontal);
+        ws.tabs[0].layout.focus_pane(source);
+        app.state.workspaces = vec![ws];
+        app.state.active = Some(0);
+        app.state.selected = 0;
+        app.state.focus_follows_mouse = true;
+        crate::ui::compute_view(&mut app.state, Rect::new(0, 0, 106, 20));
+        let info = app
+            .state
+            .pane_info_by_id(source)
+            .expect("source pane info")
+            .clone();
+
+        app.handle_mouse(mouse(
+            MouseEventKind::Moved,
+            info.inner_rect.x + 1,
+            info.inner_rect.y + 1,
+        ));
+
+        assert_eq!(app.state.workspaces[0].focused_pane_id(), Some(source));
+    }
+
+    #[tokio::test]
+    async fn hover_does_not_focus_outside_terminal_mode() {
+        let mut app = app_for_mouse_test();
+        let mut ws = Workspace::test_new("test");
+        let source = ws.tabs[0].root_pane;
+        let target = ws.test_split(Direction::Horizontal);
+        ws.tabs[0].layout.focus_pane(source);
+        app.state.workspaces = vec![ws];
+        app.state.active = Some(0);
+        app.state.selected = 0;
+        app.state.focus_follows_mouse = true;
+        app.state.mode = Mode::Settings;
+        crate::ui::compute_view(&mut app.state, Rect::new(0, 0, 106, 20));
+        let info = app
+            .state
+            .pane_info_by_id(target)
+            .expect("target pane info")
+            .clone();
+
+        app.handle_mouse(mouse(
+            MouseEventKind::Moved,
+            info.inner_rect.x + 1,
+            info.inner_rect.y + 1,
+        ));
+
+        assert_eq!(app.state.workspaces[0].focused_pane_id(), Some(source));
     }
 
     #[tokio::test]

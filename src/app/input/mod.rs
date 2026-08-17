@@ -412,6 +412,9 @@ impl App {
                         SettingsAction::SaveAgentBorderLabels(enabled) => {
                             self.save_agent_border_labels(enabled)
                         }
+                        SettingsAction::SaveFocusFollowsMouse(enabled) => {
+                            self.save_focus_follows_mouse(enabled)
+                        }
                         SettingsAction::InstallRecommendedIntegrations => {
                             self.install_recommended_integrations()
                         }

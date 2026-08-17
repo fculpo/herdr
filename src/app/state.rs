@@ -1026,6 +1026,7 @@ pub enum SettingsSection {
     Sound,
     Toast,
     PaneLabels,
+    Mouse,
     Integrations,
 }
 
@@ -1036,6 +1037,7 @@ impl SettingsSection {
         Self::Sound,
         Self::Toast,
         Self::PaneLabels,
+        Self::Mouse,
         Self::Integrations,
     ];
 
@@ -1046,6 +1048,7 @@ impl SettingsSection {
             Self::Sound => "sound",
             Self::Toast => "toasts",
             Self::PaneLabels => "pane labels",
+            Self::Mouse => "mouse",
             Self::Integrations => "integrations",
         }
     }
@@ -1475,6 +1478,7 @@ pub struct AppState {
     /// captures mouse while the focused pane app requests mouse reporting.
     pub mouse_capture: bool,
     pub copy_on_select: bool,
+    pub focus_follows_mouse: bool,
     pub right_click_passthrough_modifiers: Option<KeyModifiers>,
     pub right_click_passthrough: Option<RightClickPassthroughGesture>,
     pub redraw_on_focus_gained: bool,
@@ -1847,6 +1851,7 @@ impl AppState {
             next_agent_state_change_seq: 0,
             mouse_capture: true,
             copy_on_select: true,
+            focus_follows_mouse: false,
             right_click_passthrough_modifiers: None,
             right_click_passthrough: None,
             redraw_on_focus_gained: true,

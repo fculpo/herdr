@@ -162,6 +162,17 @@ pub(super) fn render_settings_overlay(app: &AppState, frame: &mut Frame, area: R
                 app.settings.list.selected,
             );
         }
+        SettingsSection::Mouse => {
+            render_settings_toggle(
+                frame,
+                content_area,
+                p,
+                "focus follows mouse",
+                "focus the pane under the mouse pointer without clicking",
+                app.focus_follows_mouse,
+                app.settings.list.selected,
+            );
+        }
         SettingsSection::Integrations => {
             render_settings_integrations(app, frame, content_area);
         }

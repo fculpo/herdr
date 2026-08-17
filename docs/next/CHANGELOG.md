@@ -15,6 +15,7 @@
 - Settings and `ui.status_indicators = "symbols"` can now use distinct static shapes for blocked, working, done, idle, and unknown agent states. (#2260)
 - Navigate-mode selection rows now use a dedicated per-theme cursor color, customizable via `theme.custom.selection_bg`, so the cursor stays distinguishable from the active Space and Agent highlight.
 - The plugin marketplace now discovers valid manifests at repository roots and subdirectories, groups multiple plugins under each repository, and publishes their versions and exact default-branch commits.
+- Optional `ui.focus_follows_mouse` now focuses the pane under the mouse pointer without clicking, with a matching settings toggle.
 
 ### Changed
 - Headless servers now use a configurable 120×40 virtual terminal instead of 80×24 when no client is attached, giving newly created panes a practical default size. (#2828)

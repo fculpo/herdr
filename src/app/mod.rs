@@ -638,6 +638,7 @@ impl App {
             next_agent_state_change_seq: 0,
             mouse_capture: config.ui.mouse_capture,
             copy_on_select: config.ui.copy_on_select,
+            focus_follows_mouse: config.ui.focus_follows_mouse,
             right_click_passthrough_modifiers: config.ui.right_click_passthrough_modifiers(),
             right_click_passthrough: None,
             redraw_on_focus_gained: config.ui.redraw_on_focus_gained,
@@ -1473,6 +1474,7 @@ impl App {
                     .clamp(self.state.sidebar_min_width, self.state.sidebar_max_width);
                 self.state.mouse_capture = config.ui.mouse_capture;
                 self.state.copy_on_select = config.ui.copy_on_select;
+                self.state.focus_follows_mouse = config.ui.focus_follows_mouse;
                 if self.state.redraw_on_focus_gained != config.ui.redraw_on_focus_gained {
                     self.state.request_client_config_reload = true;
                 }
@@ -2983,7 +2985,7 @@ mod tests {
         std::fs::create_dir_all(path.parent().unwrap()).unwrap();
         std::fs::write(
             &path,
-            "[terminal]\ndefault_shell = \"nu\"\nshell_mode = \"non_login\"\nnew_cwd = \"home\"\n[keys]\nnew_workspace = \"prefix+m\"\nprefix = \"ctrl+a\"\n[update]\nversion_check = false\nmanifest_check = false\n[server]\nheadless_cols = 160\nheadless_rows = 50\n[ui]\nagent_panel_sort = \"priority\"\nredraw_on_focus_gained = false\ncopy_on_select = false\nright_click_passthrough_modifier = \"ctrl\"\nprompt_new_workspace_name = true\n[ui.toast]\ndelivery = \"herdr\"\n[experimental]\nswitch_ascii_input_source_in_prefix = true\n",
+            "[terminal]\ndefault_shell = \"nu\"\nshell_mode = \"non_login\"\nnew_cwd = \"home\"\n[keys]\nnew_workspace = \"prefix+m\"\nprefix = \"ctrl+a\"\n[update]\nversion_check = false\nmanifest_check = false\n[server]\nheadless_cols = 160\nheadless_rows = 50\n[ui]\nagent_panel_sort = \"priority\"\nredraw_on_focus_gained = false\ncopy_on_select = false\nfocus_follows_mouse = true\nright_click_passthrough_modifier = \"ctrl\"\nprompt_new_workspace_name = true\n[ui.toast]\ndelivery = \"herdr\"\n[experimental]\nswitch_ascii_input_source_in_prefix = true\n",
         )
         .unwrap();
         std::env::set_var(crate::config::CONFIG_PATH_ENV_VAR, &path);
@@ -3032,6 +3034,7 @@ mod tests {
         assert_eq!(app.state.agent_panel_sort, state::AgentPanelSort::Priority);
         assert!(!app.state.redraw_on_focus_gained);
         assert!(!app.state.copy_on_select);
+        assert!(app.state.focus_follows_mouse);
         assert!(app.state.prompt_new_workspace_name);
         assert!(app.state.selection.is_some());
         assert!(app.state.selection_autoscroll.is_some());
